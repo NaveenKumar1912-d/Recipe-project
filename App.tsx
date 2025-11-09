@@ -1,12 +1,13 @@
 
 import React, { useState, useCallback } from 'react';
 import type { UserPreferences } from './types';
-// FIX: Import `translateText` to be used in `handleTranslateRequest`.
 import { getRecipe, generateRecipeImage, translateText } from './services/geminiService';
 import Header from './components/Header';
 import RecipeForm from './components/RecipeForm';
 import RecipeDisplay from './components/RecipeDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
+import Chatbot from './components/Chatbot';
+import { ChatBubbleIcon } from './components/icons';
 
 const App: React.FC = () => {
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   const handleRecipeRequest = useCallback(async (prefs: UserPreferences) => {
     setIsLoading(true);
@@ -70,19 +72,19 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-stone-100 font-sans text-stone-800">
       <Header />
       <main className="container mx-auto p-4 md:p-8">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-8">
           <RecipeForm onSubmit={handleRecipeRequest} isLoading={isLoading} />
           
           {error && (
-            <div className="mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
               <p>{error}</p>
             </div>
           )}
 
           {isLoading && (
-            <div className="mt-8 flex flex-col items-center justify-center bg-white p-8 rounded-2xl shadow-lg">
+            <div className="flex flex-col items-center justify-center bg-white p-8 rounded-2xl shadow-lg border border-stone-200">
               <LoadingSpinner />
-              <p className="mt-4 text-lg text-orange-600">Finding the perfect recipe for you...</p>
+              <p className="mt-4 text-lg text-red-800 font-serif">Finding the perfect recipe for you...</p>
             </div>
           )}
 
@@ -98,16 +100,29 @@ const App: React.FC = () => {
           )}
 
           {!recipe && !isLoading && !error && (
-            <div className="mt-8 text-center bg-white p-10 rounded-2xl shadow-lg border border-stone-200">
-                <h2 className="text-2xl font-bold text-orange-500 mb-2">Welcome to your Tamil Nadu AI Chef!</h2>
-                <p className="text-stone-600">Tell me what you'd like to eat, and I'll whip up a healthy, authentic recipe just for you.</p>
+            <div className="text-center bg-white/60 p-10 rounded-2xl shadow-md border border-stone-200">
+                <h2 className="text-2xl font-bold font-serif text-red-800 mb-2">Welcome to your Tamil Nadu AI Chef!</h2>
+                <p className="text-stone-600 max-w-prose mx-auto">Tell me what you'd like to eat, and I'll whip up a healthy, authentic recipe just for you.</p>
             </div>
           )}
+          
         </div>
       </main>
       <footer className="text-center py-4 text-stone-500 text-sm">
         <p>Powered by AI. Always cook responsibly.</p>
       </footer>
+      
+      {!isChatOpen && (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-6 right-6 bg-red-800 text-white rounded-full p-4 shadow-lg hover:bg-red-900 transition transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 z-50"
+          aria-label="Open chat"
+        >
+          <ChatBubbleIcon className="w-8 h-8" />
+        </button>
+      )}
+      
+      {isChatOpen && <Chatbot onClose={() => setIsChatOpen(false)} />}
     </div>
   );
 };

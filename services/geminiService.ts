@@ -1,13 +1,56 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+
+
+
+
+
+import { GoogleGenAI, Modality, Chat } from "@google/genai";
 import type { UserPreferences } from '../types';
 
-// FIX: Adhere to coding guidelines by using process.env.API_KEY. This also
-// resolves the TypeScript error "Property 'env' does not exist on type 'ImportMeta'".
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set");
 }
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+let chat: Chat | null = null;
+
+export function getChat(): Chat {
+  if (!chat) {
+    chat = ai.chats.create({
+      model: 'gemini-2.5-flash-lite',
+      config: {
+        systemInstruction: 'You are a friendly and helpful AI assistant for the Tamil Nadu Recipe Chef app. Your name is Cheffy. You can answer questions about cooking, ingredients, suggest recipe variations, or just have a friendly chat.',
+      },
+    });
+  }
+  return chat;
+}
+
+export async function generateSpeech(text: string): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text }] }],
+      config: {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: 'Kore' },
+          },
+        },
+      },
+    });
+    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (base64Audio) {
+      return base64Audio;
+    }
+    throw new Error("No audio data found in the response.");
+  } catch (error) {
+    console.error("Error generating speech:", error);
+    throw new Error("Failed to generate speech.");
+  }
+}
+
 
 export async function getRecipe(preferences: UserPreferences): Promise<string> {
   const { mealType, dietaryPreference, allergies, otherRequests, ingredients, spiceLevel, difficultyLevel } = preferences;
@@ -99,5 +142,41 @@ export async function translateText(text: string, language: string): Promise<str
   } catch (error) {
     console.error("Error translating text:", error);
     throw new Error("Failed to communicate with the AI model for translation.");
+  }
+}
+// FIX: Add and export the missing 'editImage' function.
+export async function editImage(base64ImageData: string, mimeType: string, prompt: string): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: base64ImageData,
+              mimeType: mimeType,
+            },
+          },
+          {
+            text: prompt,
+          },
+        ],
+      },
+      config: {
+        responseModalities: [Modality.IMAGE],
+      },
+    });
+
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        const base64ImageBytes: string = part.inlineData.data;
+        return `data:image/png;base64,${base64ImageBytes}`;
+      }
+    }
+    throw new Error("No edited image data found in the response.");
+
+  } catch (error) {
+    console.error("Error editing image:", error);
+    throw new Error("Failed to edit image.");
   }
 }

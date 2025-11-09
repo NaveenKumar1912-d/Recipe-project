@@ -17,3 +17,9 @@ export interface Ingredient {
   name: string;
   tamilName: string;
 }
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+}

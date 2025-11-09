@@ -1,7 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
 import type { UserPreferences } from '../types';
 import { MEAL_TYPES, DIETARY_PREFERENCES, SPICE_LEVELS, COMMON_INGREDIENTS, DIFFICULTY_LEVELS } from '../constants';
-import { SparklesIcon, SearchIcon } from './icons';
+import { SparklesIcon, SearchIcon, CheckIcon } from './icons';
 
 interface RecipeFormProps {
   onSubmit: (preferences: UserPreferences) => void;
@@ -71,11 +72,11 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, isLoading }) => {
     </label>
   );
 
-  const baseInputClasses = "w-full px-4 py-2 bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition duration-200";
+  const baseInputClasses = "w-full px-4 py-2 bg-white text-stone-900 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-red-700 transition duration-200";
   
   return (
     <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
-      <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">Find Your Perfect Meal</h2>
+      <h2 className="text-3xl font-bold text-stone-800 mb-6 text-center font-serif">Find Your Perfect Meal</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
@@ -127,21 +128,26 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, isLoading }) => {
               value={ingredientSearchTerm}
               onChange={(e) => setIngredientSearchTerm(e.target.value)}
               placeholder="Search ingredients (e.g., Ragi, வெங்காயம்)"
-              className="w-full pl-10 pr-4 py-2 bg-white border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition duration-200"
+              className="w-full pl-10 pr-4 py-2 bg-white text-stone-900 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-red-700 transition duration-200"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <SearchIcon className="w-5 h-5 text-stone-400" />
             </div>
           </div>
-          <div className="flex flex-wrap gap-3 p-3 bg-stone-50 rounded-lg border border-stone-200 min-h-[120px] items-start content-start">
+          <div className="flex flex-wrap gap-3 p-3 bg-stone-100 rounded-lg border border-stone-200 min-h-[120px] items-start content-start">
             {filteredIngredients.map((ingredient) => (
                <button
                 type="button"
                 key={ingredient.name}
                 onClick={() => handleIngredientToggle(ingredient.name)}
-                className={`px-3 py-1.5 rounded-full cursor-pointer transition-all duration-200 border text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400 ${selectedIngredients.has(ingredient.name) ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-stone-300 hover:bg-orange-50 hover:border-orange-300'}`}
+                className={`px-4 py-2 rounded-full cursor-pointer transition-all duration-200 border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 flex items-center gap-2 ${
+                  selectedIngredients.has(ingredient.name)
+                    ? 'bg-red-800 border-red-900 text-white shadow-sm'
+                    : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50 hover:border-red-700'
+                }`}
               >
-                {ingredient.name} <span className="opacity-75">({ingredient.tamilName})</span>
+                {selectedIngredients.has(ingredient.name) && <CheckIcon className="w-4 h-4" />}
+                {ingredient.name}
               </button>
             ))}
             {filteredIngredients.length === 0 && (
@@ -204,7 +210,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, isLoading }) => {
         <button
           type="submit"
           disabled={isLoading || !finalIngredients}
-          className={`w-full flex items-center justify-center bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-transform transform hover:scale-105 disabled:bg-orange-300 disabled:cursor-not-allowed ${animateButton ? 'animate-flash' : ''}`}
+          className={`w-full flex items-center justify-center bg-red-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-800 transition-all transform hover:scale-105 disabled:bg-red-400 disabled:cursor-not-allowed ${animateButton ? 'animate-flash' : ''}`}
           onAnimationEnd={() => setAnimateButton(false)}
         >
           {isLoading ? (

@@ -1,5 +1,5 @@
 {
-  "name": "Copy of Tamil Nadu AI Recipe Chef",
+  "name": "Recipe Recommender",
   "description": "An AI-powered recipe recommender that provides healthy and authentic Tamil Nadu style recipes based on your preferences. It includes a translation feature to make recipes accessible to everyone.",
   "requestFramePermissions": []
 }
